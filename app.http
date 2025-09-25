@@ -1,0 +1,26 @@
+### GET request to example server
+GET http://localhost:3000/health
+
+
+### POST Sign Up to a server
+POST http://localhost:3000/api/auth/sign-up
+Content-Type: application/json
+
+{
+  "name": "Admin",
+  "email": "berryrexs342@gmail.com",
+  "password": "123f123f1",
+  "role": "admin"
+}
+
+### POST Sign In to a server
+POST http://localhost:3000/api/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "berryrexs342@gmail.com",
+  "password": "123f123f1"
+}
+
+### POST Sign Out to a server
+POST http://localhost:3000/api/auth/sign-out
