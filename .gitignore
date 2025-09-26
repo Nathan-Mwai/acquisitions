@@ -1,2 +1,18 @@
 node_modules
+
+# Environment files
 .env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Neon Local data
+.neon_local/
+
+# Logs
+logs
+*.log
+
+# Drizzle generated files
+drizzle/

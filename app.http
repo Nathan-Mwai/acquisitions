@@ -7,10 +7,9 @@ POST http://localhost:3000/api/auth/sign-up
 Content-Type: application/json
 
 {
-  "name": "Admin",
-  "email": "berryrexs342@gmail.com",
-  "password": "123f123f1",
-  "role": "admin"
+  "name": "Nerry",
+  "email": "nerryrexs112@gmail.com",
+  "password": "123f123f1"
 }
 
 ### POST Sign In to a server
@@ -24,3 +23,5 @@ Content-Type: application/json
 
 ### POST Sign Out to a server
 POST http://localhost:3000/api/auth/sign-out
+
+
