@@ -86,7 +86,10 @@ export const signin = async (req, res, next) => {
   } catch (e) {
     logger.error('SignIn Error', e);
 
-    if (e.message === 'User with this email does not exist' || e.message === 'Invalid password') {
+    if (
+      e.message === 'User with this email does not exist' ||
+      e.message === 'Invalid password'
+    ) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 

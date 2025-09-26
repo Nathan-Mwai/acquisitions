@@ -36,12 +36,14 @@ Visit the [Neon Console](https://console.neon.tech) and collect:
 ### 3. Configure Environment Files
 
 #### Development Environment (.env.development)
+
 ```bash
 # Copy and update with your actual values
 cp .env.development.example .env.development
 ```
 
 Update `.env.development` with:
+
 ```env
 NEON_API_KEY=your_neon_api_key_here
 NEON_PROJECT_ID=your_neon_project_id_here
@@ -50,12 +52,14 @@ ARCJET_KEY=your_arcjet_key_here
 ```
 
 #### Production Environment (.env.production)
+
 ```bash
 # Copy and update with your actual values
 cp .env.production.example .env.production
 ```
 
 Update `.env.production` with your actual Neon Cloud URL:
+
 ```env
 DATABASE_URL=postgres://username:password@ep-xxx-xxx.us-east-1.aws.neon.tech/neondb?sslmode=require
 ```
@@ -141,24 +145,26 @@ docker-compose -f docker-compose.prod.yml down
 
 ### Environment Variables
 
-| Variable | Development | Production | Description |
-|----------|-------------|------------|-------------|
-| `NODE_ENV` | development | production | Runtime environment |
-| `DATABASE_URL` | Neon Local | Neon Cloud | Database connection string |
-| `NEON_API_KEY` | Required | - | Neon API key for Local |
-| `NEON_PROJECT_ID` | Required | - | Neon project ID |
-| `PARENT_BRANCH_ID` | Required | - | Parent branch for ephemeral branches |
-| `PORT` | 3000 | 3000 | Application port |
-| `LOG_LEVEL` | debug | info | Logging verbosity |
+| Variable           | Development | Production | Description                          |
+| ------------------ | ----------- | ---------- | ------------------------------------ |
+| `NODE_ENV`         | development | production | Runtime environment                  |
+| `DATABASE_URL`     | Neon Local  | Neon Cloud | Database connection string           |
+| `NEON_API_KEY`     | Required    | -          | Neon API key for Local               |
+| `NEON_PROJECT_ID`  | Required    | -          | Neon project ID                      |
+| `PARENT_BRANCH_ID` | Required    | -          | Parent branch for ephemeral branches |
+| `PORT`             | 3000        | 3000       | Application port                     |
+| `LOG_LEVEL`        | debug       | info       | Logging verbosity                    |
 
 ### Database Connections
 
 #### Development (Neon Local)
+
 - **Connection**: `postgres://neon:npg@neon-local:5432/neondb?sslmode=require`
 - **Features**: Ephemeral branches, automatic cleanup
 - **SSL**: Self-signed certificates (handled automatically)
 
 #### Production (Neon Cloud)
+
 - **Connection**: Your actual Neon Cloud URL
 - **Features**: Serverless scaling, connection pooling
 - **SSL**: Full SSL/TLS encryption
@@ -168,6 +174,7 @@ docker-compose -f docker-compose.prod.yml down
 ### Common Issues
 
 #### 1. Neon Local Connection Issues
+
 ```bash
 # Check Neon Local container health
 docker-compose -f docker-compose.dev.yml ps
@@ -180,6 +187,7 @@ docker-compose -f docker-compose.dev.yml restart neon-local
 ```
 
 #### 2. Database Migration Issues
+
 ```bash
 # Run migrations manually
 docker-compose -f docker-compose.dev.yml exec app npm run db:migrate
@@ -189,6 +197,7 @@ docker-compose -f docker-compose.dev.yml exec app npm run db:generate
 ```
 
 #### 3. Port Conflicts
+
 ```bash
 # Change ports in docker-compose files
 # Development: Change "3000:3000" to "3001:3000"
@@ -196,6 +205,7 @@ docker-compose -f docker-compose.dev.yml exec app npm run db:generate
 ```
 
 #### 4. Environment Variable Issues
+
 ```bash
 # Verify environment loading
 docker-compose -f docker-compose.dev.yml exec app env | grep DATABASE_URL
@@ -210,11 +220,13 @@ testConnection();
 ### Health Checks
 
 #### Application Health
+
 ```bash
 curl http://localhost:3000/health
 ```
 
 #### Database Health
+
 ```bash
 # Development
 docker-compose -f docker-compose.dev.yml exec neon-local nc -z localhost 5432
@@ -250,11 +262,13 @@ acquisitions/
 ## 🔐 Security Considerations
 
 ### Development
+
 - Self-signed certificates for Neon Local (automatically handled)
 - Ephemeral branches are automatically deleted
 - Local network isolation
 
 ### Production
+
 - Full SSL/TLS encryption to Neon Cloud
 - Read-only container filesystem
 - Dropped Linux capabilities
