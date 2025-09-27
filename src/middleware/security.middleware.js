@@ -7,20 +7,20 @@ const securityMiddleware = async (req, res, next) => {
     const role = req.user?.role || 'guest';
 
     let limit;
-    let message;
+    // let message;
 
     switch (role) {
       case 'admin':
         limit = 20;
-        message = 'Admin request limit exceeded (20 per minute). Slow down.';
+        // message = 'Admin request limit exceeded (20 per minute). Slow down.';
         break;
       case 'user':
         limit = 10;
-        message = 'User request limit exceeded (10 per minute). Slow down.';
+        // message = 'User request limit exceeded (10 per minute). Slow down.';
         break;
       case 'guest':
         limit = 5;
-        message = 'Guest request limit exceeded (5 per minute). Slow down.';
+        // message = 'Guest request limit exceeded (5 per minute). Slow down.';
         break;
     }
 
@@ -40,12 +40,10 @@ const securityMiddleware = async (req, res, next) => {
         path: req.path,
       });
 
-      return res
-        .status(403)
-        .json({
-          error: 'Forbidden',
-          message: 'Automated Requests are not allowed',
-        });
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Automated Requests are not allowed',
+      });
     }
 
     if (decision.isDenied() && decision.reason.isShield()) {
@@ -56,12 +54,10 @@ const securityMiddleware = async (req, res, next) => {
         method: req.method,
       });
 
-      return res
-        .status(403)
-        .json({
-          error: 'Forbidden',
-          message: 'Request blocked by security policy',
-        });
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Request blocked by security policy',
+      });
     }
 
     if (decision.isDenied() && decision.reason.isRateLimit()) {
@@ -79,12 +75,10 @@ const securityMiddleware = async (req, res, next) => {
     next();
   } catch (e) {
     console.error('Arcjet middleware error', e);
-    res
-      .status(500)
-      .json({
-        error: 'Internal server Error',
-        message: 'Something went wrong with security middleware',
-      });
+    res.status(500).json({
+      error: 'Internal server Error',
+      message: 'Something went wrong with security middleware',
+    });
   }
 };
 
