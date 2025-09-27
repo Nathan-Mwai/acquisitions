@@ -1,0 +1,128 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    env:
+      NODE_ENV: test
+      NODE_OPTIONS: --experimental-vm-modules
+      DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+      
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Wait for PostgreSQL
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          until pg_isready -h localhost -p 5432 -U test; do
+            echo "Waiting for database connection..."
+            sleep 2
+          done
+          echo "✅ PostgreSQL is ready!"
+          
+      - name: Run database migrations (if applicable)
+        run: |
+          if npm run db:migrate --if-present; then
+            echo "✅ Database migrations completed"
+          else
+            echo "ℹ️ No migration script found, skipping..."
+          fi
+        continue-on-error: true
+        
+      - name: Run Tests
+        run: |
+          echo "::group::Running Tests"
+          if npm test -- --coverage --coverageReporters=text,lcov,json,html; then
+            echo "::endgroup::"
+            echo "✅ All tests passed!"
+            echo "TEST_STATUS=success" >> $GITHUB_ENV
+          else
+            echo "::endgroup::"
+            echo "::error title=Tests Failed::Some tests failed. Please check the test output above for details."
+            echo "TEST_STATUS=failed" >> $GITHUB_ENV
+            exit 1
+          fi
+        continue-on-error: true
+        
+      - name: Upload Coverage Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            coverage/
+            !coverage/tmp
+          retention-days: 30
+          
+      - name: Generate Test Summary
+        if: always()
+        run: |
+          echo "## 🧪 Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$TEST_STATUS" = "success" ]; then
+            echo "### ✅ Tests Status: PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "All tests completed successfully! 🎉" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Tests Status: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Some tests failed. Please review the test output and fix the issues." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Coverage Information" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f "coverage/lcov.info" ]; then
+            echo "Coverage reports have been generated and uploaded as artifacts." >> $GITHUB_STEP_SUMMARY
+            echo "- **Artifact Name**: coverage-reports" >> $GITHUB_STEP_SUMMARY
+            echo "- **Retention**: 30 days" >> $GITHUB_STEP_SUMMARY
+            echo "- **Includes**: HTML reports, LCOV data, and JSON coverage data" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No coverage data was generated." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔧 Environment Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Node.js Version**: 20.x" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: test" >> $GITHUB_STEP_SUMMARY
+          echo "- **Database**: PostgreSQL 15" >> $GITHUB_STEP_SUMMARY
+          
+      - name: Add Test Annotations
+        if: failure()
+        run: |
+          echo "::warning title=Test Failure::Tests failed in this workflow run. Please check the detailed output above."
+          echo "::notice title=Next Steps::Review the failed tests, fix the issues, and push your changes to re-run the tests."
